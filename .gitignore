@@ -1,4 +1,3 @@
 .venv/
-../Family/old/
+old/
 config.py
-.idea/
