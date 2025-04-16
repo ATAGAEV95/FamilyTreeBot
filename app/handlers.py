@@ -1,31 +1,93 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 
 import app.keyboards as kb
 import app.requests as req
+import app.utils as ut
 
 router = Router()
 
 
+# ACCESS_PASSWORD = '1234'
+ACCESS_PASSWORD = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
+authorized_users = {}
+
+
+class RegisterState(StatesGroup):
+    waiting_for_password = State()
+
+
 @router.message(CommandStart())
-async def cmd_start(message: Message):
-    await message.answer('Добро пожаловать!'#, reply_markup=kb.main
-                         )
+async def start_handler(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    user = await req.get_user_by_id(user_id)
+    if user:
+        await message.answer('Добро пожаловать! Вы уже авторизованы.')
+    else:
+        await message.answer('Введите пароль для доступа:')
+        await state.set_state(RegisterState.waiting_for_password)
+
+
+@router.message(RegisterState.waiting_for_password)
+async def password_handler(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    if ut.hash_password(message.text.strip()) == ACCESS_PASSWORD:
+        await req.add_user(user_id, message.from_user.username or '')
+        await message.answer('Авторизация успешна! Теперь у вас полный доступ.')
+        await state.clear()
+    else:
+        await message.answer('Неверный пароль. Попробуйте еще раз:')
 
 
 @router.message()
-async def process_fullname(message: Message):
+async def after_auth_person_search(message: Message):
+    user = await req.get_user_by_id(message.from_user.id)
+    if not user:
+        await message.answer("Доступ запрещён. Для доступа введите /start.")
+        return
     persons = await req.search_persons(message.text)
     if not persons:
         await message.answer("Ничего не найдено.")
-        return
     else:
         await message.answer(
             "Все совпадения:",
             reply_markup=await kb.persons_keyboard(persons)
         )
+
+
+# @router.message(CommandStart())
+# async def start_handler(message: Message):
+#     user_id = message.from_user.id
+#     if not authorized_users.get(user_id, False):
+#         await message.answer('Введите пароль для доступа:')
+#     else:
+#         await message.answer('Добро пожаловать! Вы уже авторизованы.')
+#
+#
+# @router.message(lambda message: not authorized_users.get(message.from_user.id, False))
+# async def password_handler(message: Message):
+#     user_id = message.from_user.id
+#     if message.text.strip() == ACCESS_PASSWORD:
+#         authorized_users[user_id] = True
+#         await message.answer('Авторизация успешна! Теперь у вас полный доступ.')
+#     else:
+#         await message.answer('Неверный пароль. Попробуйте еще раз:')
+#
+#
+# @router.message(lambda message: authorized_users.get(message.from_user.id, False))
+# async def process_fullname(message: Message):
+#     persons = await req.search_persons(message.text)
+#     if not persons:
+#         await message.answer("Ничего не найдено.")
+#         return
+#     else:
+#         await message.answer(
+#             "Все совпадения:",
+#             reply_markup=await kb.persons_keyboard(persons)
+#         )
 
 
 @router.callback_query(F.data.startswith("person_"))
@@ -35,12 +97,18 @@ async def persons_callback_query(callback: CallbackQuery):
     if not person:
         await callback.answer("Персонаж не найден")
         return
+    photo_info = (
+        f"🖼️ Фото: <a href='{person.photo_url}'>Смотреть</a>"
+        if person.photo_url
+        else "🖼️ Фото: не указано"
+    )
     main_info = (
         f"👤 {person.first_name} {person.last_name} {person.father_name}\n"
         f"🎂 Дата рождения: {person.birth_date.strftime('%d.%m.%Y') if person.birth_date else 'Не указана'}\n"
         f"💀 Дата смерти: {person.death_date.strftime('%d.%m.%Y') if person.death_date else 'Не указана'}\n"
         f"⚧ Пол: {person.gender if person.gender else 'Не указан'}\n"
-        f"📖 Биография: {person.bio if person.bio else 'Не указана'}"
+        f"📖 Биография: {person.bio if person.bio else 'Не указана'}\n"
+        f"{photo_info}"
     )
     siblings = await req.get_siblings(person.first_name, person.last_name)
     siblings_info = ""
@@ -70,11 +138,5 @@ async def persons_callback_query(callback: CallbackQuery):
              for child in children]
         )
     full_response = main_info + parents_info + siblings_info + spouses_info + children_info
-    if person.photo_url:
-        await callback.message.answer_photo(
-            photo=person.photo_url,
-            caption=full_response
-        )
-    else:
-        await callback.message.answer(full_response)
+    await callback.message.answer(full_response, parse_mode="HTML")
     await callback.answer()
