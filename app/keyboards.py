@@ -1,5 +1,5 @@
-from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton)
-from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 async def persons_keyboard(persons: list):

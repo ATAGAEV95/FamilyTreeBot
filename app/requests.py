@@ -198,6 +198,7 @@ async def get_user_by_id(user_id: int):
         print(f"Ошибка получения пользователя: {e}")
         return None
 
+
 async def add_user(user_id: int, username: str):
     try:
         async with async_session() as session:

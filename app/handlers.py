@@ -11,9 +11,7 @@ import app.utils as ut
 router = Router()
 
 
-# ACCESS_PASSWORD = '1234'
 ACCESS_PASSWORD = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
-authorized_users = {}
 
 
 class RegisterState(StatesGroup):
@@ -56,38 +54,6 @@ async def after_auth_person_search(message: Message):
             "Все совпадения:",
             reply_markup=await kb.persons_keyboard(persons)
         )
-
-
-# @router.message(CommandStart())
-# async def start_handler(message: Message):
-#     user_id = message.from_user.id
-#     if not authorized_users.get(user_id, False):
-#         await message.answer('Введите пароль для доступа:')
-#     else:
-#         await message.answer('Добро пожаловать! Вы уже авторизованы.')
-#
-#
-# @router.message(lambda message: not authorized_users.get(message.from_user.id, False))
-# async def password_handler(message: Message):
-#     user_id = message.from_user.id
-#     if message.text.strip() == ACCESS_PASSWORD:
-#         authorized_users[user_id] = True
-#         await message.answer('Авторизация успешна! Теперь у вас полный доступ.')
-#     else:
-#         await message.answer('Неверный пароль. Попробуйте еще раз:')
-#
-#
-# @router.message(lambda message: authorized_users.get(message.from_user.id, False))
-# async def process_fullname(message: Message):
-#     persons = await req.search_persons(message.text)
-#     if not persons:
-#         await message.answer("Ничего не найдено.")
-#         return
-#     else:
-#         await message.answer(
-#             "Все совпадения:",
-#             reply_markup=await kb.persons_keyboard(persons)
-#         )
 
 
 @router.callback_query(F.data.startswith("person_"))
