@@ -25,7 +25,7 @@ async def start_handler(message: Message, state: FSMContext):
     if user:
         await message.answer('Добро пожаловать! Вы уже авторизованы.')
     else:
-        await message.answer('Введите пароль для доступа:')
+        await message.answer('Добро пожаловать! Для продолжения работы введите пароль для доступа.')
         await state.set_state(RegisterState.waiting_for_password)
 
 
@@ -34,7 +34,7 @@ async def password_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     if ut.hash_password(message.text.strip()) == ACCESS_PASSWORD:
         await req.add_user(user_id, message.from_user.username or '')
-        await message.answer('Авторизация успешна! Теперь у вас полный доступ.')
+        await message.answer('Авторизация успешна! Теперь у вас полный доступ. Чтобы начать поиск, просто введите имя или фамилию персоны.')
         await state.clear()
     else:
         await message.answer('Неверный пароль. Попробуйте еще раз:')
@@ -48,7 +48,7 @@ async def after_auth_person_search(message: Message):
         return
     persons = await req.search_persons(message.text)
     if not persons:
-        await message.answer("Ничего не найдено.")
+        await message.answer("Ничего не найдено. Попробуйте изменить запрос или уточнить данные.")
     else:
         await message.answer(
             "Все совпадения:",

@@ -7,13 +7,17 @@ from config import DATABASE_URL
 
 schema = 'public'
 
+
 def get_engine(schema: str):
     return create_async_engine(
         DATABASE_URL,
         connect_args={"server_settings": {"search_path": schema}})
 
 
-engine = get_engine(schema)
+if schema == None:
+    engine = get_engine('test')
+else:
+    engine = get_engine(schema)
 async_session = async_sessionmaker(engine)
 
 
