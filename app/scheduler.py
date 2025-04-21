@@ -53,7 +53,6 @@ async def send_birthday_notifications(bot: Bot):
         for user in users:
             try:
                 await bot.send_message(chat_id=user.user_id, text=message)
-                print(f"Сообщение отправлено пользователю {user.user_id}")
             except Exception as e:
                 print(f"Ошибка при отправке сообщения пользователю {user.user_id}: {e}")
     else:
