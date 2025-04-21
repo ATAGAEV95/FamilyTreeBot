@@ -23,7 +23,7 @@ async def start_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user = await req.get_user_by_id(user_id)
     if user:
-        await message.answer('Добро пожаловать! Вы уже авторизованы.')
+        await message.answer('Добро пожаловать! Чтобы начать поиск, просто введите имя или фамилию персоны.')
     else:
         await message.answer('Добро пожаловать! Для продолжения работы введите пароль для доступа.')
         await state.set_state(RegisterState.waiting_for_password)
