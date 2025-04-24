@@ -11,7 +11,7 @@ import app.utils as ut
 router = Router()
 
 
-ACCESS_PASSWORD = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
+ACCESS_PASSWORD = 'e5ae93bd8095fbd86c25a110bbf194a5a1a209f1e8eb31bb30c8b0ecbe254d58'
 
 
 class RegisterState(StatesGroup):
