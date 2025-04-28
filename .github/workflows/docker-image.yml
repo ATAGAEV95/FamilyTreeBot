@@ -20,11 +20,11 @@ jobs:
 
       # Шаг 3: Экспорт Docker-образа в tar-файл
       - name: Save Docker image as tar file
-        run: docker save familytreebot:latest -o image.tar
+        run: docker save familytreebot:latest -o image_fb.tar
 
       # Шаг 4: Изменение прав доступа к файлу (для успешного копирования)
-      - name: Set permissions on image.tar
-        run: chmod 644 image.tar
+      - name: Set permissions on image_fb.tar
+        run: chmod 644 image_fb.tar
 
       # Шаг 5: Передача tar-файла на сервер с помощью scp
       - name: Copy Docker image to server via scp
@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.DEPLOY_SERVER_USER }}
           password: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
           port: 22
-          source: "image.tar"
+          source: "image_fb.tar"
           target: "~/deploy/"
 
       # Шаг 6: Загрузка образа и запуск контейнера на удалённом сервере по SSH
@@ -46,7 +46,7 @@ jobs:
           password: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
           port: 22
           script: |
-            docker load -i ~/deploy/image.tar
+            docker load -i ~/deploy/image_fb.tar
             docker stop fambot || true
             docker rm fambot || true
             docker run -d --name fambot \
