@@ -42,6 +42,28 @@ FamilyTreeBot помогает быстро находить сведения о
 
 ---
 
+## Предварительные настройки бота
+
+Нужно внести изменения в файл [config.py](https://github.com/ATAGAEV95/FamilyTreeBot/blob/develop/config.py), удалить оттуда все, оставив только это:
+```python
+TG_TOKEN = 'Ваш токен телеграмм бота'
+
+# Ваше подключение к БД Postgres
+DATABASE_URL = "postgresql+asyncpg://login:password@host:port/bdname"
+
+# Ваша схема из БД Postgres, по умолчанию "public"
+SCHEMA = "public"
+```
+Ввести ваш токен телеграмм бота.   
+В DATABASE_URL надо внести:  
+`login` - логин базы данных  
+`password` - пароль базы данных  
+`host` - хост базы данных, например 192.168.0.1  
+`port` - порт базы данных, обычно это 5432 для Postgres  
+`bdname` - имя базы данных      
+
+---
+
 ## Как запустить бота
 
 Чтобы создать образы Docker, перейдите в корневой каталог проекта в терминале и выполните следующую команду:
@@ -61,3 +83,5 @@ docker ps
 docker stop fambot
 docker rm fambot
 ```
+
+---
