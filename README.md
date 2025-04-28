@@ -2,7 +2,7 @@
 
 **FamilyTreeBot** — это Telegram-бот для поиска информации о ваших родственниках и друзьях по имени и фамилии. Проект реализован на Python с использованием библиотеки **aiogram** и базой данных **PostgreSQL**.   
 Этот бот предназначен только для просмотра информации.  
-Для того чтобы администрировать эти данные надо использовать бот [PersonnelManagerBot](https://github.com/ATAGAEV95/PersonnelManagerBot)
+Но прежде всего нужно сначала запустить бот [PersonnelManagerBot](https://github.com/ATAGAEV95/PersonnelManagerBot) для того чтобы администрировать эти данные.
 
 
 ---
@@ -61,6 +61,26 @@ SCHEMA = "public"
 `host` - хост базы данных, например 192.168.0.1  
 `port` - порт базы данных, обычно это 5432 для Postgres  
 `bdname` - имя базы данных      
+
+---
+
+## Пароль для бота
+
+Пароль надо написать в файле [handlers.py](https://github.com/ATAGAEV95/FamilyTreeBot/blob/develop/app/handlers.py) в строке:
+```python
+ACCESS_PASSWORD = 'e5ae93bd8095fbd86c25a110bbf194a5a1a209f1e8eb31bb30c8b0ecbe254d58'
+```
+Это пароль, закодированный с использованием хэш-функции.   
+Чтобы получить такой пароль используйте этот код:
+```python
+import hashlib
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+print(hash_password('12345678')) #ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f
+```
+Можно закодировать ваш любой пароль, а полученный хэш вести в `ACCESS_PASSWORD`
 
 ---
 
