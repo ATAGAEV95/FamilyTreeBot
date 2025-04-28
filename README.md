@@ -71,7 +71,7 @@ SCHEMA = "public"
 ACCESS_PASSWORD = 'e5ae93bd8095fbd86c25a110bbf194a5a1a209f1e8eb31bb30c8b0ecbe254d58'
 ```
 Это пароль, закодированный с использованием хэш-функции.   
-Чтобы получить такой пароль используйте этот код:
+Чтобы получить такой пароль используйте функцию `hash_password`:
 ```python
 import hashlib
 
@@ -105,3 +105,4 @@ docker rm fambot
 ```
 
 ---
+
