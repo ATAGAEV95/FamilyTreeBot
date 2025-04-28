@@ -64,3 +64,9 @@ class Users(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, autoincrement=False)
     username = Column(String)
+
+
+async def init_models():
+    """Создает таблицы в базе данных, если они не существуют"""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
