@@ -1,10 +1,11 @@
 import asyncio
+
 from aiogram import Bot, Dispatcher
 
-from config import TG_TOKEN
 from app.handlers import router
-from app.scheduler import start_scheduler
 from app.models import init_models
+from app.scheduler import start_scheduler
+from config import TG_TOKEN
 
 
 async def main():
