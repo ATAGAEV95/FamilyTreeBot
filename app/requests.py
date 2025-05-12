@@ -20,11 +20,9 @@ async def get_siblings(first_name: str, last_name: str):
     try:
         async with async_session() as session:
             target_person = await session.execute(
-                select(Persons.person_id)
-                .where(and_(
-                    Persons.first_name == first_name,
-                    Persons.last_name == last_name
-                ))
+                select(Persons.person_id).where(
+                    and_(Persons.first_name == first_name, Persons.last_name == last_name)
+                )
             )
             target_id = target_person.scalar()
             if not target_id:
@@ -35,17 +33,13 @@ async def get_siblings(first_name: str, last_name: str):
                     Persons.first_name,
                     Persons.last_name,
                     Persons.father_name,
-                    case(
-                        (Persons.gender == 'Мужской', 'Брат'),
-                        else_='Сестра'
-                    ).label('sibling_type')
+                    case((Persons.gender == "Мужской", "Брат"), else_="Сестра").label(
+                        "sibling_type"
+                    ),
                 )
                 .select_from(Persons)
                 .join(Relationship, Relationship.child_id == Persons.person_id)
-                .where(and_(
-                    Relationship.parent_id.in_(subquery),
-                    Persons.person_id != target_id
-                ))
+                .where(and_(Relationship.parent_id.in_(subquery), Persons.person_id != target_id))
                 .distinct()
             )
             result = await session.execute(stmt)
@@ -70,10 +64,9 @@ async def get_parents(child_first_name: str, child_last_name: str):
                 .select_from(Relationship)
                 .join(Parent, Relationship.parent_id == Parent.person_id)
                 .join(Child, Relationship.child_id == Child.person_id)
-                .where(and_(
-                    Child.first_name == child_first_name,
-                    Child.last_name == child_last_name
-                ))
+                .where(
+                    and_(Child.first_name == child_first_name, Child.last_name == child_last_name)
+                )
             )
             result = await session.execute(query)
             return [dict(row._mapping) for row in result.all()]
@@ -91,22 +84,23 @@ async def search_persons(search_str: str):
             conditions = []
             if len(search_terms) == 2:
                 term1, term2 = search_terms
-                conditions.extend([
-                    and_(
-                        Persons.first_name.ilike(f"%{term1}%"),
-                        Persons.last_name.ilike(f"%{term2}%")
-                    ),
-                    and_(
-                        Persons.first_name.ilike(f"%{term2}%"),
-                        Persons.last_name.ilike(f"%{term1}%")
-                    )
-                ])
+                conditions.extend(
+                    [
+                        and_(
+                            Persons.first_name.ilike(f"%{term1}%"),
+                            Persons.last_name.ilike(f"%{term2}%"),
+                        ),
+                        and_(
+                            Persons.first_name.ilike(f"%{term2}%"),
+                            Persons.last_name.ilike(f"%{term1}%"),
+                        ),
+                    ]
+                )
             else:
                 term = search_str
-                conditions.extend([
-                    Persons.last_name.ilike(f"%{term}%"),
-                    Persons.first_name.ilike(f"%{term}%")
-                ])
+                conditions.extend(
+                    [Persons.last_name.ilike(f"%{term}%"), Persons.first_name.ilike(f"%{term}%")]
+                )
             query = query.where(or_(*conditions))
             result = await session.execute(query)
             return result.scalars().all()
@@ -118,33 +112,26 @@ async def search_persons(search_str: str):
 async def get_spouses(first_name: str, last_name: str):
     try:
         async with async_session() as session:
-            target_subq = select(Persons.person_id).where(
-                and_(
-                    Persons.first_name == first_name,
-                    Persons.last_name == last_name
-                )
-            ).scalar_subquery()
-            spouse_type = case(
-                (Persons.gender == 'Мужской', 'Супруг'),
-                else_='Супруга'
-            ).label('spouse_type')
+            target_subq = (
+                select(Persons.person_id)
+                .where(and_(Persons.first_name == first_name, Persons.last_name == last_name))
+                .scalar_subquery()
+            )
+            spouse_type = case((Persons.gender == "Мужской", "Супруг"), else_="Супруга").label(
+                "spouse_type"
+            )
             query = (
-                select(
-                    Persons.first_name,
-                    Persons.last_name,
-                    Persons.father_name,
-                    spouse_type
+                select(Persons.first_name, Persons.last_name, Persons.father_name, spouse_type)
+                .join(
+                    Marriage,
+                    or_(
+                        Persons.person_id == Marriage.husband_id,
+                        Persons.person_id == Marriage.wife_id,
+                    ),
                 )
-                .join(Marriage, or_(
-                    Persons.person_id == Marriage.husband_id,
-                    Persons.person_id == Marriage.wife_id
-                ))
                 .where(
                     Persons.person_id != target_subq,
-                    or_(
-                        Marriage.wife_id == target_subq,
-                        Marriage.husband_id == target_subq
-                    )
+                    or_(Marriage.wife_id == target_subq, Marriage.husband_id == target_subq),
                 )
             )
             result = await session.execute(query)
@@ -158,26 +145,17 @@ async def get_children(first_name: str, last_name: str):
     try:
         async with async_session() as session:
             parent_query = select(Persons.person_id).where(
-                and_(
-                    Persons.first_name == first_name,
-                    Persons.last_name == last_name
-                )
+                and_(Persons.first_name == first_name, Persons.last_name == last_name)
             )
             parent_id = (await session.execute(parent_query)).scalar()
 
             if not parent_id:
                 return []
-            child_type = case(
-                (Persons.gender == 'Мужской', 'Сын'),
-                else_='Дочь'
-            ).label('child_type')
+            child_type = case((Persons.gender == "Мужской", "Сын"), else_="Дочь").label(
+                "child_type"
+            )
             query = (
-                select(
-                    Persons.first_name,
-                    Persons.last_name,
-                    Persons.father_name,
-                    child_type
-                )
+                select(Persons.first_name, Persons.last_name, Persons.father_name, child_type)
                 .join(Relationship, Relationship.child_id == Persons.person_id)
                 .where(Relationship.parent_id == parent_id)
             )

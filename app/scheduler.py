@@ -2,7 +2,7 @@ import datetime
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import Bot
-from sqlalchemy import func, select, cast, Integer, extract
+from sqlalchemy import select, cast, Integer, extract
 
 from app.models import async_session, Persons, Users
 

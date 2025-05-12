@@ -11,7 +11,7 @@ import app.utils as ut
 router = Router()
 
 
-ACCESS_PASSWORD = 'e5ae93bd8095fbd86c25a110bbf194a5a1a209f1e8eb31bb30c8b0ecbe254d58'
+ACCESS_PASSWORD = "e5ae93bd8095fbd86c25a110bbf194a5a1a209f1e8eb31bb30c8b0ecbe254d58"
 
 
 class RegisterState(StatesGroup):
@@ -23,9 +23,11 @@ async def start_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user = await req.get_user_by_id(user_id)
     if user:
-        await message.answer('Добро пожаловать! Чтобы начать поиск, просто введите имя или фамилию персоны.')
+        await message.answer(
+            "Добро пожаловать! Чтобы начать поиск, просто введите имя или фамилию персоны."
+        )
     else:
-        await message.answer('Добро пожаловать! Для продолжения работы введите пароль для доступа.')
+        await message.answer("Добро пожаловать! Для продолжения работы введите пароль для доступа.")
         await state.set_state(RegisterState.waiting_for_password)
 
 
@@ -33,11 +35,14 @@ async def start_handler(message: Message, state: FSMContext):
 async def password_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     if ut.hash_password(message.text.strip()) == ACCESS_PASSWORD:
-        await req.add_user(user_id, message.from_user.username or '')
-        await message.answer('Авторизация успешна! Теперь у вас полный доступ. Чтобы начать поиск, просто введите имя или фамилию персоны.')
+        await req.add_user(user_id, message.from_user.username or "")
+        await message.answer(
+            "Авторизация успешна! Теперь у вас полный доступ. "
+            "Чтобы начать поиск, просто введите имя или фамилию персоны."
+        )
         await state.clear()
     else:
-        await message.answer('Неверный пароль. Попробуйте еще раз:')
+        await message.answer("Неверный пароль. Попробуйте еще раз:")
 
 
 @router.message()
@@ -50,10 +55,7 @@ async def after_auth_person_search(message: Message):
     if not persons:
         await message.answer("Ничего не найдено. Попробуйте изменить запрос или уточнить данные.")
     else:
-        await message.answer(
-            "Все совпадения:",
-            reply_markup=await kb.persons_keyboard(persons)
-        )
+        await message.answer("Все совпадения:", reply_markup=await kb.persons_keyboard(persons))
 
 
 @router.callback_query(F.data.startswith("person_"))
@@ -80,8 +82,10 @@ async def persons_callback_query(callback: CallbackQuery):
     siblings_info = ""
     if siblings:
         siblings_info = "\n\n👨👦 Братья/сестры:\n" + "\n".join(
-            [f"{sib['sibling_type']}: {sib['first_name']} {sib['last_name']} {sib['father_name']}"
-             for sib in siblings]
+            [
+                f"{sib['sibling_type']}: {sib['first_name']} {sib['last_name']} {sib['father_name']}"
+                for sib in siblings
+            ]
         )
     parents = await req.get_parents(person.first_name, person.last_name)
     parents_info = ""
@@ -93,15 +97,19 @@ async def persons_callback_query(callback: CallbackQuery):
     spouses_info = ""
     if spouses:
         spouses_info = "\n\n👫 Супруг(а):\n" + "\n".join(
-            [f"{s['spouse_type']}: {s['first_name']} {s['last_name']} {s['father_name']}"
-             for s in spouses]
+            [
+                f"{s['spouse_type']}: {s['first_name']} {s['last_name']} {s['father_name']}"
+                for s in spouses
+            ]
         )
     children = await req.get_children(person.first_name, person.last_name)
     children_info = ""
     if children:
         children_info = "\n\n👶 Дети:\n" + "\n".join(
-            [f"{child['child_type']}: {child['first_name']} {child['last_name']} {child['father_name']}"
-             for child in children]
+            [
+                f"{child['child_type']}: {child['first_name']} {child['last_name']} {child['father_name']}"
+                for child in children
+            ]
         )
     full_response = main_info + parents_info + siblings_info + spouses_info + children_info
     await callback.message.answer(full_response, parse_mode="HTML")
