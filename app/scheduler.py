@@ -8,9 +8,9 @@ from app.models import async_session, Persons, Users
 
 
 async def birthday_notification():
-    """
-    Выбирает из БД персон, у которых сегодня день рождения,
-    сравнивая день и месяц даты рождения (год не учитываем).
+    """Создает список людей у которых сегодня день рождения.
+
+    Сравнивая день и месяц даты рождения (год не учитываем).
     """
     moscow_tz = pytz.timezone('Europe/Moscow')
     today = datetime.datetime.now(moscow_tz).date()
@@ -26,8 +26,8 @@ async def birthday_notification():
 
 
 async def get_all_users():
-    """
-    Получает всех пользователей из таблицы Users.
+    """Получает всех пользователей из таблицы Users.
+
     Предполагается, что в таблице хранится user_id телеграм-пользователя.
     """
     async with async_session() as session:
@@ -38,9 +38,8 @@ async def get_all_users():
 
 
 async def send_birthday_notifications(bot: Bot):
-    """
-    Запрашивает из БД персон с днём рождения, формирует сообщение
-    и отправляет его каждому пользователю, зарегистрированному в таблице Users.
+    """Формирует сообщение и отправляет его каждому пользователю.
+
     Если записей с днем рождения нет, сообщение не отправляется.
     """
     persons = await birthday_notification()
@@ -60,8 +59,8 @@ async def send_birthday_notifications(bot: Bot):
 
 
 def start_scheduler(bot: Bot):
-    """
-    Инициализация и запуск APScheduler с настройкой на московское время.
+    """Инициализация и запуск APScheduler с настройкой на московское время.
+
     Задача срабатывает каждый день в 9:00 по Москве и отправляет уведомления всем пользователям.
     """
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')

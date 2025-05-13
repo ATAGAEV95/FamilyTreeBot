@@ -1,0 +1,17 @@
+[project]
+requires-python = ">=3.9"
+
+[tool.ruff]
+# Set the maximum line length to 79.
+line-length = 100
+
+[tool.ruff.lint]
+# Add the `line-too-long` rule to the enforced rule set. By default, Ruff omits rules that
+# overlap with the use of a formatter, like Black, but we can override this behavior by
+# explicitly adding the rule.
+extend-select = ["E501", "UP", "D"]
+
+[tool.ruff.format]
+# Format all docstring code snippets with a line length of 60.
+docstring-code-line-length = 100
+#quote-style = "single"
