@@ -51,9 +51,7 @@ class Relationship(Base):
     child_id = Column(Integer, ForeignKey("persons.person_id"), nullable=False)
     relationship_type = Column(
         String(20),
-        CheckConstraint(
-            "relationship_type IN ('Родной', 'Приемный', 'Отчим', 'Мачеха')"
-        ),
+        CheckConstraint("relationship_type IN ('Родной', 'Приемный', 'Отчим', 'Мачеха')"),
     )
 
     __table_args__ = (CheckConstraint("parent_id <> child_id"),)
