@@ -1,11 +1,13 @@
-from sqlalchemy import select, case, and_, or_
+from typing import Optional
+
+from sqlalchemy import and_, case, or_, select
 from sqlalchemy.orm import aliased
 
-from app.models import Persons, Relationship, Marriage, Users
-from app.models import async_session
+from app.models import Marriage, Persons, Relationship, Users, async_session
 
 
-async def get_person(person_id: int):
+async def get_person(person_id: int) -> Optional[Persons]:
+    """Выполняет запрос к БД для поиска человека с заданным person_id."""
     try:
         async with async_session() as session:
             query = select(Persons).where(Persons.person_id == person_id)
@@ -16,7 +18,8 @@ async def get_person(person_id: int):
         return None
 
 
-async def get_siblings(first_name: str, last_name: str):
+async def get_siblings(first_name: str, last_name: str) -> list[dict[str, str]]:
+    """Выполняет запрос к БД для получения списка братьев и сестёр указанного человека."""
     try:
         async with async_session() as session:
             target_person = await session.execute(
@@ -49,7 +52,8 @@ async def get_siblings(first_name: str, last_name: str):
         return []
 
 
-async def get_parents(child_first_name: str, child_last_name: str):
+async def get_parents(child_first_name: str, child_last_name: str) -> list[dict[str, str]]:
+    """Выполняет запрос к БД для получения списка родителей указанного человека."""
     try:
         async with async_session() as session:
             Child = aliased(Persons)
@@ -75,7 +79,11 @@ async def get_parents(child_first_name: str, child_last_name: str):
         return []
 
 
-async def search_persons(search_str: str):
+async def search_persons(search_str: str) -> Optional[list[Persons]]:
+    """Выполняет запрос к БД для поиска людей.
+
+    Поиск идет по 'имени', 'фамилии', 'имя фамилия' или 'фамилия имя'.
+    """
     try:
         async with async_session() as session:
             search_str = search_str.strip()
@@ -109,7 +117,8 @@ async def search_persons(search_str: str):
         return []
 
 
-async def get_spouses(first_name: str, last_name: str):
+async def get_spouses(first_name: str, last_name: str) -> list[dict[str, str]]:
+    """Выполняет запрос к БД для получения списка супругов указанного человека."""
     try:
         async with async_session() as session:
             target_subq = (
@@ -141,7 +150,8 @@ async def get_spouses(first_name: str, last_name: str):
         return []
 
 
-async def get_children(first_name: str, last_name: str):
+async def get_children(first_name: str, last_name: str) -> list[dict[str, str]]:
+    """Выполняет запрос к БД для получения списка детей указанного человека."""
     try:
         async with async_session() as session:
             parent_query = select(Persons.person_id).where(
@@ -166,7 +176,8 @@ async def get_children(first_name: str, last_name: str):
         return []
 
 
-async def get_user_by_id(user_id: int):
+async def get_user_by_id(user_id: int) -> Optional[Persons]:
+    """Выполняет запрос к БД для получения пользователя из базы по user_id."""
     try:
         async with async_session() as session:
             query = select(Users).where(Users.user_id == user_id)
@@ -177,7 +188,8 @@ async def get_user_by_id(user_id: int):
         return None
 
 
-async def add_user(user_id: int, username: str):
+async def add_user(user_id: int, username: str) -> None:
+    """Добавляет пользователя в БД."""
     try:
         async with async_session() as session:
             user = Users(user_id=user_id, username=username)
