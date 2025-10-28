@@ -7,7 +7,11 @@ from app.scheduler import start_scheduler
 from app.models import init_models
 
 
-async def main():
+async def main() -> None:
+    """Основная асинхронная функция запуска бота и планировщика.
+
+    Также запускает функцию init_models.
+    """
     bot = Bot(token=TG_TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
