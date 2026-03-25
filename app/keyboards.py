@@ -1,12 +1,15 @@
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
-async def persons_keyboard(persons: list):
+async def persons_keyboard(persons: list) -> InlineKeyboardMarkup:
+    """Генерирует клавиатуру со списком найденных персон."""
     keyboard = InlineKeyboardBuilder()
     for person in persons:
-        keyboard.add(InlineKeyboardButton(
-            text=f"{person.first_name} {person.last_name}",
-            callback_data=f"person_{person.person_id}"
-        ))
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f"{person.first_name} {person.last_name}",
+                callback_data=f"person_{person.person_id}",
+            )
+        )
     return keyboard.adjust(1).as_markup()
