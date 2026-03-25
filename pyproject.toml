@@ -1,0 +1,25 @@
+[project]
+name = "family-tree-bot"
+version = "0.1.0"
+description = "A Telegram bot for a family tree"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram~=3.19.0",
+    "apscheduler~=3.11.0",
+    "asyncpg~=0.30.0",
+    "greenlet>=3.3.2",
+    "python-dotenv~=1.1.0",
+    "pytz~=2025.2",
+    "sqlalchemy~=2.0.40",
+]
+
+[tool.ruff]
+line-length = 101
+fix = true
+
+[tool.ruff.lint]
+extend-select = ["E501", "UP", "D", "I", "ANN001", "ANN201"]
+ignore = ["D100", "D203", "D213"]
+
+[tool.ruff.format]
+docstring-code-line-length = 100
