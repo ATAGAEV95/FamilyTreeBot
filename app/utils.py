@@ -2,4 +2,5 @@ import hashlib
 
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+    """Создает и возвращает SHA-256 хеш пароля."""
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
