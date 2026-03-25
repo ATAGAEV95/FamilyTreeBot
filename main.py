@@ -1,10 +1,12 @@
 import asyncio
+import logging
+
 from aiogram import Bot, Dispatcher
 
-from config import TG_TOKEN
 from app.handlers import router
-from app.scheduler import start_scheduler
 from app.models import init_models
+from app.scheduler import start_scheduler
+from config import TG_TOKEN
 
 
 async def main() -> None:
@@ -12,6 +14,7 @@ async def main() -> None:
 
     Также запускает функцию init_models.
     """
+    logging.basicConfig(level=logging.INFO)
     bot = Bot(token=TG_TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
