@@ -2,3 +2,4 @@
 old/
 .idea/
 .env
+.agent/
