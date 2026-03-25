@@ -1,28 +1,40 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
-from sqlalchemy import Column, Integer, String, Date, Text, ForeignKey, CheckConstraint
+from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Integer, String, Text
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncEngine, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
 
 from config import DATABASE_URL, SCHEMA
 
 
-def get_engine(schema: str):
+def get_engine(schema: str) -> AsyncEngine:
+    """Создаёт и возвращает асинхронный движок SQLAlchemy с указанным схемой.
+
+    Устанавливает параметр search_path в соединении, чтобы все запросы выполнялись
+    в заданной схеме PostgreSQL.
+    """
     return create_async_engine(
         DATABASE_URL,
-        connect_args={"server_settings": {"search_path": schema}})
+        connect_args={"server_settings": {"search_path": schema}},
+        pool_pre_ping=True,
+        pool_recycle=1800,
+    )
 
 
-if SCHEMA is None or SCHEMA == '':
-    engine = get_engine('public')
+if SCHEMA is None or SCHEMA == "":
+    engine = get_engine("public")
 else:
     engine = get_engine(SCHEMA)
 async_session = async_sessionmaker(engine)
 
 
 class Base(AsyncAttrs, DeclarativeBase):
+    """Базовый класс для всех моделей."""
+
     pass
 
 
 class Persons(Base):
+    """Модель персоны в генеалогическом древе."""
+
     __tablename__ = "persons"
 
     person_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -35,7 +47,10 @@ class Persons(Base):
     bio = Column(Text)
     photo_url = Column(String(255))
 
+
 class Relationship(Base):
+    """Модель родственных связей между персонами."""
+
     __tablename__ = "relationships"
 
     relationship_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -43,14 +58,17 @@ class Relationship(Base):
     child_id = Column(Integer, ForeignKey("persons.person_id"), nullable=False)
     relationship_type = Column(
         String(20),
-        CheckConstraint("relationship_type IN ('Родной', 'Приемный', 'Отчим', 'Мачеха')")
+        CheckConstraint(
+            "relationship_type IN ('Родной', 'Приемный', 'Отчим', 'Мачеха')"
+        ),
     )
 
-    __table_args__ = (
-        CheckConstraint("parent_id <> child_id"),
-    )
+    __table_args__ = (CheckConstraint("parent_id <> child_id"),)
+
 
 class Marriage(Base):
+    """Модель браков между персонами."""
+
     __tablename__ = "marriages"
 
     marriage_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -61,12 +79,14 @@ class Marriage(Base):
 
 
 class Users(Base):
+    """Модель пользователей Telegram для доступа к боту."""
+
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, autoincrement=False)
     username = Column(String)
 
 
-async def init_models():
-    """Создает таблицы в базе данных, если они не существуют"""
+async def init_models() -> None:
+    """Создает таблицы в базе данных, если они не существуют."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
