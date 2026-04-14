@@ -12,7 +12,7 @@ def get_engine(schema: str):
 
 
 if SCHEMA is None or SCHEMA == '':
-    engine = get_engine('public')
+    engine = get_engine('family')
 else:
     engine = get_engine(SCHEMA)
 async_session = async_sessionmaker(engine)
