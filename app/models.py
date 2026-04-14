@@ -2,7 +2,7 @@ from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Integer, Strin
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncEngine, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-from config import DATABASE_URL, SCHEMA
+from config import DATABASE_URL
 
 
 def get_engine(schema: str) -> AsyncEngine:
@@ -18,9 +18,10 @@ def get_engine(schema: str) -> AsyncEngine:
         pool_recycle=1800,
     )
 
+SCHEMA = "family"
 
-if SCHEMA is None or SCHEMA == "":
-    engine = get_engine("family")
+if SCHEMA is None or SCHEMA == '':
+    engine = get_engine('public')
 else:
     engine = get_engine(SCHEMA)
 async_session = async_sessionmaker(engine)
