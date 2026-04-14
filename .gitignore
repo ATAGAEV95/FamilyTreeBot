@@ -2,3 +2,6 @@
 old/
 .idea/
 .env
+.agent/
+__pycache__/
+.ruff_cache/

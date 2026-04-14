@@ -1,33 +1,35 @@
 import datetime
+from collections.abc import Sequence
+
 import pytz
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram import Bot
-from sqlalchemy import func, select, cast, Integer, extract
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from sqlalchemy import Integer, cast, extract, select
 
-from app.models import async_session, Persons, Users
+from app.models import Persons, Users, async_session
 
 
-async def birthday_notification():
+async def birthday_notification() -> Sequence[Persons]:
+    """Выбирает из БД персон, у которых сегодня день рождения.
+    
+    Сравнивает день и месяц даты рождения (год не учитываем).
     """
-    Выбирает из БД персон, у которых сегодня день рождения,
-    сравнивая день и месяц даты рождения (год не учитываем).
-    """
-    moscow_tz = pytz.timezone('Europe/Moscow')
+    moscow_tz = pytz.timezone("Europe/Moscow")
     today = datetime.datetime.now(moscow_tz).date()
 
     async with async_session() as session:
         stmt = select(Persons).where(
-            cast(extract('day', Persons.birth_date), Integer) == today.day,
-            cast(extract('month', Persons.birth_date), Integer) == today.month
+            cast(extract("day", Persons.birth_date), Integer) == today.day,
+            cast(extract("month", Persons.birth_date), Integer) == today.month,
         )
         result = await session.execute(stmt)
         persons = result.scalars().all()
     return persons
 
 
-async def get_all_users():
-    """
-    Получает всех пользователей из таблицы Users.
+async def get_all_users() -> Sequence[Users]:
+    """Получает всех пользователей из таблицы Users.
+    
     Предполагается, что в таблице хранится user_id телеграм-пользователя.
     """
     async with async_session() as session:
@@ -37,10 +39,10 @@ async def get_all_users():
     return users
 
 
-async def send_birthday_notifications(bot: Bot):
-    """
-    Запрашивает из БД персон с днём рождения, формирует сообщение
-    и отправляет его каждому пользователю, зарегистрированному в таблице Users.
+async def send_birthday_notifications(bot: Bot) -> None:
+    """Запрашивает из БД персон с днём рождения и отправляет уведомления.
+    
+    Формирует сообщение и отправляет его каждому пользователю, зарегистрированному в таблице Users.
     Если записей с днем рождения нет, сообщение не отправляется.
     """
     persons = await birthday_notification()
@@ -59,19 +61,15 @@ async def send_birthday_notifications(bot: Bot):
         print("Не найдено людей с днем рождения на сегодня")
 
 
-def start_scheduler(bot: Bot):
-    """
-    Инициализация и запуск APScheduler с настройкой на московское время.
+def start_scheduler(bot: Bot) -> None:
+    """Инициализация и запуск APScheduler с настройкой на московское время.
+    
     Задача срабатывает каждый день в 9:00 по Москве и отправляет уведомления всем пользователям.
     """
-    scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
     scheduler.add_job(
-        send_birthday_notifications,
-        trigger="cron",
-        hour=9,
-        minute=0,
-        args=[bot]
+        send_birthday_notifications, trigger="cron", hour=9, minute=0, args=[bot]
     )
 
     scheduler.start()
