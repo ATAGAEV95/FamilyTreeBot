@@ -51,6 +51,7 @@ jobs:
             docker stop fambot || true
             docker rm fambot || true
             docker run -d --name fambot \
+              --restart unless-stopped \
               -e TG_TOKEN="${{ secrets.TG_TOKEN }}" \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               familytreebot:latest
